@@ -265,22 +265,16 @@ if st.session_state.validation_started and st.session_state.validation_result is
     progress_bar = st.progress(0, text="Initialising pipeline…")
     stage_status = st.empty()
 
-    stages = [
-        (15,  "📄 Extracting text from PDF…"),
-        (35,  "🔍 Tenant Agent — checking required clauses…"),
-        (60,  "🏠 Landlord Agent — reviewing compliance…"),
-        (82,  "🛡️ Insurer Agent — validating signatures & coverage…"),
-        (95,  "⚖️ Decision Agent — aggregating results…"),
-    ]
-
-    for pct, msg in stages:
-        progress_bar.progress(pct, text=msg)
-        stage_status.info(msg)
-        time.sleep(0.4)
-
     try:
         pdf_bytes = uploaded_file.read()
-        result = run_document_validation(pdf_bytes, uploaded_file.name, model_name=model_name)
+        
+        def update_progress(pct, msg):
+            progress_bar.progress(pct, text=msg)
+            stage_status.info(msg)
+            
+        result = run_document_validation(
+            pdf_bytes, uploaded_file.name, model_name=model_name, progress_callback=update_progress
+        )
         st.session_state.validation_result = result
     except Exception as exc:
         st.error(f"❌ Processing failed: {exc}")

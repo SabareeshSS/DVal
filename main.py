@@ -391,15 +391,26 @@ def run_document_validation(
     pdf_bytes: bytes,
     filename: str = "document.pdf",
     model_name: str | None = None,
+    progress_callback=None,
 ) -> dict:
     """Run the full multi-agent validation pipeline and persist results."""
+    if progress_callback:
+        progress_callback(15, "📄 Extracting text from PDF…")
     extracted_text = extract_pdf_text_from_bytes(pdf_bytes, filename)
     state: dict = {"text": extracted_text, "filename": filename}
 
+    if progress_callback:
+        progress_callback(35, "🔍 Tenant Agent — checking required clauses…")
     state = tenant_agent(state, model_name)
+    if progress_callback:
+        progress_callback(60, "🏠 Landlord Agent — reviewing compliance…")
     state = landlord_agent(state, model_name)
+    if progress_callback:
+        progress_callback(82, "🛡️ Insurer Agent — validating signatures & coverage…")
     state = insurer_agent(state, model_name)
 
+    if progress_callback:
+        progress_callback(95, "⚖️ Decision Agent — aggregating results…")
     decision = decision_agent(state)
     final_state = {**state, **decision}
 
