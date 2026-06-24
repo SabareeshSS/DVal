@@ -1,11 +1,102 @@
-required_clauses:
-  - FIXED-TERM AGREEMENT
-  - RENT PAYMENT PROCEDURE
-  - FORM OF PAYMENT
-  - FULL DISCLOSURE
+rental_agreement_rules:
 
-formatting_checks:
-  - Check for missing dates
-  - Check for missing signatures
-  - Verify page numbers are consistent
-  - Look for red flags (e.g., "TBD", empty fields)
+  tenant_rules:
+    description: >
+      Rules to ensure the tenant's rights and obligations are clearly
+      defined and protected within the rental agreement.
+    required_clauses:
+      - name: FIXED-TERM AGREEMENT
+        description: >
+          The agreement must specify a clear start date and end date
+          for the rental period. Open-ended or undefined terms are
+          not acceptable.
+      - name: RENT PAYMENT PROCEDURE
+        description: >
+          The agreement must outline how, when, and where rent is to
+          be paid, including due dates, grace periods, and late
+          payment penalties.
+      - name: FORM OF PAYMENT
+        description: >
+          Accepted payment methods must be explicitly stated
+          (e.g., bank transfer, check, online portal).
+          Cash-only terms must be flagged for review.
+      - name: FULL DISCLOSURE
+        description: >
+          The agreement must disclose all fees, charges, and conditions
+          including but not limited to security deposits, maintenance
+          responsibilities, utility obligations, and pet policies.
+      - name: TERMINATION AND RENEWAL TERMS
+        description: >
+          Conditions for early termination, notice periods required
+          by either party, and renewal options must be clearly documented.
+      - name: TENANT RIGHTS AND RESPONSIBILITIES
+        description: >
+          The agreement must define tenant obligations such as property
+          upkeep, noise policies, and guest rules, as well as tenant
+          rights regarding repairs and privacy.
+
+  landlord_rules:
+    description: >
+      Rules to ensure the landlord has fulfilled all legal and procedural
+      obligations before the agreement is considered valid.
+    checks:
+      - name: TENANT CONSENT VERIFICATION
+        description: >
+          Confirm that the tenant has reviewed, agreed to, and signed
+          the agreement without coercion or missing acknowledgment sections.
+      - name: DATE COMPLETENESS CHECK
+        description: >
+          Verify that all date fields are filled in, including agreement
+          date, lease start date, lease end date, and any addendum dates.
+          Flag any blank or TBD date fields.
+      - name: SIGNATURE COMPLETENESS CHECK
+        description: >
+          Ensure all required signature fields are completed by the
+          appropriate parties (tenant, landlord, co-signers if applicable).
+          No signature field should be blank.
+      - name: RED FLAG DETECTION
+        description: >
+          Scan the agreement for incomplete or suspicious entries such as
+          "TBD", "N/A" in critical fields, blank clauses, contradictory
+          terms, or altered text without initials.
+      - name: LANDLORD OBLIGATIONS DISCLOSURE
+        description: >
+          Confirm the agreement includes landlord responsibilities such as
+          property maintenance, habitability standards, and emergency
+          contact information.
+      - name: LEGAL COMPLIANCE CHECK
+        description: >
+          Verify that the agreement complies with local and national
+          tenancy laws, including rent control regulations, deposit limits,
+          and eviction procedures.
+
+  insurer_rules:
+    description: >
+      Rules to ensure the rental agreement meets the minimum requirements
+      for insurance validation and liability coverage.
+    checks:
+      - name: TENANT SIGNATURE VALIDATION
+        description: >
+          Confirm the tenant's signature is present, legible, and matches
+          the name stated in the agreement. Digital signatures must include
+          a timestamp.
+      - name: LANDLORD SIGNATURE VALIDATION
+        description: >
+          Confirm the landlord's signature is present, legible, and matches
+          the registered property owner's name. Digital signatures must
+          include a timestamp.
+      - name: PROPERTY DETAILS VERIFICATION
+        description: >
+          Validate that the insured property address, unit number, and
+          description in the agreement match the details on the insurance
+          policy.
+      - name: COVERAGE PERIOD ALIGNMENT
+        description: >
+          Ensure the rental term dates align with the insurance coverage
+          period. Any gap between lease start and insurance activation
+          must be flagged.
+      - name: LIABILITY CLAUSE PRESENCE
+        description: >
+          Confirm the agreement contains a clause addressing liability
+          responsibilities for property damage, personal injury, and
+          renter's insurance requirements.

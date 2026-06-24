@@ -1,9 +1,10 @@
 import json
 import os
-import re
 import subprocess
 import yaml
+from datetime import datetime
 from pathlib import Path
+
 import fitz  # PyMuPDF
 
 try:
@@ -18,21 +19,39 @@ OUTPUT_FILE = OUTPUT_DIR / "result.json"
 APPROVAL_FILE = OUTPUT_DIR / "approval_gate.json"
 
 
-def load_validation_rules():
-    with open(BASE_DIR / "rules.yaml", "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+# ---------------------------------------------------------------------------
+# Rule Loading
+# ---------------------------------------------------------------------------
+
+def load_validation_rules() -> dict:
+    rules_path = BASE_DIR / "rules.yaml"
+    with open(rules_path, "r", encoding="utf-8") as f:
+        raw = yaml.safe_load(f)
+    # Support both top-level key styles
+    return raw.get("rental_agreement_rules", raw)
 
 
 VALIDATION_RULES = load_validation_rules()
 
 
-def get_installed_ollama_models():
+# ---------------------------------------------------------------------------
+# Ollama Helpers
+# ---------------------------------------------------------------------------
+
+def get_installed_ollama_models() -> list[str]:
+    """Return a list of locally installed Ollama model names."""
     try:
-        result = subprocess.run(["ollama", "list"], capture_output=True, text=True, check=True)
-        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        result = subprocess.run(
+            ["ollama", "list"],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=10,
+        )
+        lines = [ln.strip() for ln in result.stdout.splitlines() if ln.strip()]
         if len(lines) <= 1:
             return []
-        models = []
+        models: list[str] = []
         for line in lines[1:]:
             name = line.split()[0]
             if name and name not in models:
@@ -42,149 +61,368 @@ def get_installed_ollama_models():
         return []
 
 
-def get_llm(model_name=None):
-    selected_model = model_name or os.getenv("OLLAMA_MODEL") or "llama3.2:latest"
-    return ChatOllama(model=selected_model, base_url="http://localhost:11434")
+def get_llm(model_name: str | None = None) -> "ChatOllama":
+    selected = model_name or os.getenv("OLLAMA_MODEL") or "llama3.2:latest"
+    return ChatOllama(model=selected, base_url="http://localhost:11434")
 
 
-def parse_json_response(response_text):
+# ---------------------------------------------------------------------------
+# JSON Parsing
+# ---------------------------------------------------------------------------
+
+def parse_json_response(response_text: str) -> dict:
     text = response_text if isinstance(response_text, str) else str(response_text)
     start = text.find("{")
     end = text.rfind("}")
     if start == -1 or end == -1 or end <= start:
-        raise ValueError(f"Could not parse JSON from model output: {text}")
-    return json.loads(text[start : end + 1])
+        raise ValueError(f"No valid JSON object found in model output:\n{text}")
+    return json.loads(text[start: end + 1])
 
 
-def fallback_clause_validation(text):
-    normalized = text.lower()
-    clause_keywords = {
-        "Termination Clause": ["termination", "terminate", "terminated"],
-        "Confidentiality Clause": ["confidential", "confidentiality"],
-        "Governing Law": ["governing law", "jurisdiction", "law"],
-        "Payment Terms": ["payment", "rent", "pay", "monthly", "due"],
+# ---------------------------------------------------------------------------
+# Fallback Validators (deterministic, no LLM)
+# ---------------------------------------------------------------------------
+
+def _clause_names(rules: dict) -> list[str]:
+    clauses = rules.get("tenant_rules", {}).get("required_clauses", [])
+    return [c["name"] if isinstance(c, dict) else str(c) for c in clauses]
+
+
+def _check_names(section: str, rules: dict) -> list[str]:
+    checks = rules.get(section, {}).get("checks", [])
+    return [c["name"] if isinstance(c, dict) else str(c) for c in checks]
+
+
+def fallback_tenant_validation(_text: str) -> dict:
+    missing = _clause_names(VALIDATION_RULES)
+    return {
+        "tenant_missing_clauses": missing,
+        "tenant_found_clauses": [],
+        "tenant_status": "FAILED",
     }
-    found = []
-    missing = []
-    for clause, keywords in clause_keywords.items():
-        if any(keyword in normalized for keyword in keywords):
-            found.append(clause)
-        else:
-            missing.append(clause)
-    return {"missing_clauses": missing, "found_clauses": found}
 
 
-def fallback_compliance_validation(text):
-    issues = []
-    if not re.search(r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\b", text, re.I):
-        if not re.search(r"\b\d{4}\b", text):
-            issues.append("No clear date found")
-    if not re.search(r"\b(signature|signed|sign)\b", text, re.I):
-        issues.append("Missing signature evidence")
-    if not re.search(r"\bpage\b", text, re.I):
-        issues.append("Page numbering not clearly present")
-    if re.search(r"\b(tbd|n/a|empty|blank)\b", text, re.I):
-        issues.append("Contains placeholder or empty-field markers")
-    return {"issues_found": issues}
+def fallback_landlord_validation(_text: str) -> dict:
+    return {
+        "landlord_issues": [
+            "Fallback executed — Ollama unavailable. "
+            "Manual review required for all landlord checks."
+        ],
+        "landlord_status": "FAILED",
+    }
 
 
-def call_model_with_fallback(prompt, fallback_builder, model_name=None):
+def fallback_insurer_validation(_text: str) -> dict:
+    return {
+        "insurer_issues": [
+            "Fallback executed — Ollama unavailable. "
+            "Manual review required for all insurer checks."
+        ],
+        "insurer_status": "FAILED",
+    }
+
+
+# ---------------------------------------------------------------------------
+# LLM Call Wrapper
+# ---------------------------------------------------------------------------
+
+def call_model_with_fallback(
+    prompt: str,
+    fallback_fn,
+    model_name: str | None = None,
+) -> dict:
     try:
         llm = get_llm(model_name)
-        result = llm.invoke(prompt)
-        return parse_json_response(result.content if hasattr(result, "content") else result)
+        raw = llm.invoke(prompt)
+        content = raw.content if hasattr(raw, "content") else str(raw)
+        return parse_json_response(content)
     except Exception as exc:
-        print(f"Falling back to deterministic validation because Ollama call failed: {exc}")
-        return fallback_builder()
+        print(f"[WARN] LLM call failed ({exc}). Using deterministic fallback.")
+        return fallback_fn()
 
 
-def extract_pdf_text_from_bytes(pdf_bytes, filename="document.pdf"):
+# ---------------------------------------------------------------------------
+# PDF Extraction
+# ---------------------------------------------------------------------------
+
+def extract_pdf_text_from_bytes(pdf_bytes: bytes, filename: str = "document.pdf") -> str:
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-    return "\n".join(page.get_text() for page in doc)
+    pages = [page.get_text() for page in doc]
+    doc.close()
+    full_text = "\n".join(pages)
+    if not full_text.strip():
+        raise ValueError(
+            "The uploaded PDF appears to be empty or image-only (no extractable text)."
+        )
+    return full_text
 
 
-def clause_validator_agent(state, model_name=None):
-    required_clauses = VALIDATION_RULES["required_clauses"]
+# ---------------------------------------------------------------------------
+# Agents
+# ---------------------------------------------------------------------------
+
+def tenant_agent(state: dict, model_name: str | None = None) -> dict:
+    """Validate required tenant clauses against rules.yaml."""
+    clauses = VALIDATION_RULES.get("tenant_rules", {}).get("required_clauses", [])
+    clause_list = [
+        {"name": c["name"], "description": c.get("description", "")}
+        if isinstance(c, dict) else {"name": c, "description": ""}
+        for c in clauses
+    ]
 
     prompt = f"""
-Check if the following required clauses are present in this document:
+You are a Tenant Compliance Agent reviewing a residential rental agreement.
 
-Required Clauses: {required_clauses}
+Your task is to check whether each of the following required clauses is present
+and adequately addressed in the document below.
+
+Required Clauses:
+{json.dumps(clause_list, indent=2)}
 
 Document:
 \"\"\"
 {state['text']}
 \"\"\"
 
-Return a JSON object with:
-- "missing_clauses": list of clauses not found
-- "found_clauses": list of clauses found
+Instructions:
+- For each clause, determine if it is present AND sufficiently covered.
+- A clause is "found" only if the document meaningfully addresses it — not just
+  mentions the keyword.
+- Return ONLY a valid JSON object with these exact keys:
+  {{
+    "tenant_missing_clauses": ["<clause name>", ...],
+    "tenant_found_clauses": ["<clause name>", ...],
+    "tenant_status": "OK" or "FAILED"
+  }}
+- "tenant_status" must be "OK" only if tenant_missing_clauses is empty.
+- Do NOT include any explanation outside the JSON.
 """
-    parsed = call_model_with_fallback(prompt, lambda: fallback_clause_validation(state["text"]), model_name)
-    return {**state, **parsed}
+    parsed = call_model_with_fallback(
+        prompt,
+        lambda: fallback_tenant_validation(state["text"]),
+        model_name,
+    )
+
+    # Normalise keys defensively
+    return {
+        **state,
+        "tenant_missing_clauses": parsed.get("tenant_missing_clauses", []),
+        "tenant_found_clauses": parsed.get("tenant_found_clauses", []),
+        "tenant_status": parsed.get("tenant_status", "FAILED"),
+    }
 
 
-def compliance_agent(state, model_name=None):
-    formatting_issues = VALIDATION_RULES["formatting_checks"]
+def landlord_agent(state: dict, model_name: str | None = None) -> dict:
+    """Run landlord checks; skips automatically if tenant stage failed."""
+    if state.get("tenant_status") == "FAILED":
+        return {
+            **state,
+            "landlord_status": "SKIPPED",
+            "landlord_issues": [
+                "Skipped — Tenant validation failed. "
+                "Resolve tenant clause issues before landlord review."
+            ],
+        }
+
+    checks = VALIDATION_RULES.get("landlord_rules", {}).get("checks", [])
+    check_list = [
+        {"name": c["name"], "description": c.get("description", "")}
+        if isinstance(c, dict) else {"name": c, "description": ""}
+        for c in checks
+    ]
 
     prompt = f"""
-Review the document for formatting and red flags:
-Checks: {formatting_issues}
+You are a Landlord Compliance Agent reviewing a residential rental agreement.
+
+Your task is to perform the following checks on the document below and identify
+any issues, omissions, or red flags.
+
+Checks to Perform:
+{json.dumps(check_list, indent=2)}
 
 Document:
 \"\"\"
 {state['text']}
 \"\"\"
 
-Return a JSON object with:
-- "issues_found": list of formatting/completeness issues
+Instructions:
+- For each check, identify specific problems found (e.g., missing date, blank
+  signature field, "TBD" in a critical section).
+- If a check passes cleanly, do NOT include it in the issues list.
+- Return ONLY a valid JSON object with these exact keys:
+  {{
+    "landlord_issues": ["<specific issue description>", ...],
+    "landlord_status": "OK" or "FAILED"
+  }}
+- "landlord_status" must be "OK" only if landlord_issues is empty.
+- Do NOT include any explanation outside the JSON.
 """
-    parsed = call_model_with_fallback(prompt, lambda: fallback_compliance_validation(state["text"]), model_name)
-    return {**state, **parsed}
+    parsed = call_model_with_fallback(
+        prompt,
+        lambda: fallback_landlord_validation(state["text"]),
+        model_name,
+    )
+
+    return {
+        **state,
+        "landlord_issues": parsed.get("landlord_issues", []),
+        "landlord_status": parsed.get("landlord_status", "FAILED"),
+    }
 
 
-def decision_agent(state, model_name=None):
+def insurer_agent(state: dict, model_name: str | None = None) -> dict:
+    """Run insurer checks; skips if any prior stage failed or was skipped."""
+    prior_failed = (
+        state.get("tenant_status") == "FAILED"
+        or state.get("landlord_status") in ("FAILED", "SKIPPED")
+    )
+    if prior_failed:
+        return {
+            **state,
+            "insurer_status": "SKIPPED",
+            "insurer_issues": [
+                "Skipped — One or more prior validation stages failed. "
+                "Resolve Tenant and Landlord issues first."
+            ],
+        }
+
+    checks = VALIDATION_RULES.get("insurer_rules", {}).get("checks", [])
+    check_list = [
+        {"name": c["name"], "description": c.get("description", "")}
+        if isinstance(c, dict) else {"name": c, "description": ""}
+        for c in checks
+    ]
+
     prompt = f"""
-Based on the following validation results:
+You are an Insurance Compliance Agent reviewing a residential rental agreement.
 
-Missing Clauses: {state.get('missing_clauses', [])}
-Issues Found: {state.get('issues_found', [])}
+Your task is to validate the document against the following insurance-related
+checks and identify any deficiencies.
 
-Decide whether the document should be APPROVED or REJECTED.
-Explain the reasoning clearly.
+Checks to Perform:
+{json.dumps(check_list, indent=2)}
 
-Return JSON:
-{{
-  "decision": "APPROVED" or "REJECTED",
-  "reason": "..."
-}}
+Document:
+\"\"\"
+{state['text']}
+\"\"\"
+
+Instructions:
+- For each check, identify specific problems found (e.g., missing tenant
+  signature, coverage period mismatch, absent liability clause).
+- If a check passes cleanly, do NOT include it in the issues list.
+- Return ONLY a valid JSON object with these exact keys:
+  {{
+    "insurer_issues": ["<specific issue description>", ...],
+    "insurer_status": "OK" or "FAILED"
+  }}
+- "insurer_status" must be "OK" only if insurer_issues is empty.
+- Do NOT include any explanation outside the JSON.
 """
-    parsed = call_model_with_fallback(prompt, lambda: ({"decision": "REJECTED" if state.get("missing_clauses") or state.get("issues_found") else "APPROVED", "reason": "Determined from rule-based validation."}), model_name)
-    return {"result": parsed}
+    parsed = call_model_with_fallback(
+        prompt,
+        lambda: fallback_insurer_validation(state["text"]),
+        model_name,
+    )
+
+    return {
+        **state,
+        "insurer_issues": parsed.get("insurer_issues", []),
+        "insurer_status": parsed.get("insurer_status", "FAILED"),
+    }
 
 
-def run_document_validation(pdf_bytes, filename="document.pdf", model_name=None):
+def decision_agent(state: dict) -> dict:
+    """Aggregate all agent results into a final decision payload."""
+    t_status = state.get("tenant_status", "FAILED")
+    l_status = state.get("landlord_status", "FAILED")
+    i_status = state.get("insurer_status", "FAILED")
+
+    all_ok = t_status == "OK" and l_status == "OK" and i_status == "OK"
+    decision = "APPROVED" if all_ok else "REJECTED"
+
+    if all_ok:
+        reason = (
+            "All three validation stages (Tenant, Landlord, Insurer) passed "
+            "successfully. The document meets all required standards."
+        )
+    else:
+        parts = []
+        if t_status != "OK":
+            parts.append(f"Tenant stage: {t_status}")
+        if l_status != "OK":
+            parts.append(f"Landlord stage: {l_status}")
+        if i_status != "OK":
+            parts.append(f"Insurer stage: {i_status}")
+        reason = (
+            "Document rejected due to validation failures — "
+            + ", ".join(parts)
+            + ". Please review the detailed issues in each stage."
+        )
+
+    result_payload = {
+        "decision": decision,
+        "reason": reason,
+        "tenant_status": t_status,
+        "landlord_status": l_status,
+        "insurer_status": i_status,
+        "details": {
+            "tenant": {
+                "missing": state.get("tenant_missing_clauses", []),
+                "found": state.get("tenant_found_clauses", []),
+            },
+            "landlord": {
+                "issues": state.get("landlord_issues", []),
+            },
+            "insurer": {
+                "issues": state.get("insurer_issues", []),
+            },
+        },
+        "processed_at": datetime.utcnow().isoformat() + "Z",
+    }
+    return {"result": result_payload}
+
+
+# ---------------------------------------------------------------------------
+# Orchestrator
+# ---------------------------------------------------------------------------
+
+def run_document_validation(
+    pdf_bytes: bytes,
+    filename: str = "document.pdf",
+    model_name: str | None = None,
+) -> dict:
+    """Run the full multi-agent validation pipeline and persist results."""
     extracted_text = extract_pdf_text_from_bytes(pdf_bytes, filename)
-    state = {"text": extracted_text}
-    state = clause_validator_agent(state, model_name)
-    state = compliance_agent(state, model_name)
-    decision = decision_agent(state, model_name)
-    result = {**state, **decision}
+    state: dict = {"text": extracted_text, "filename": filename}
 
-    OUTPUT_DIR.mkdir(exist_ok=True)
+    state = tenant_agent(state, model_name)
+    state = landlord_agent(state, model_name)
+    state = insurer_agent(state, model_name)
+
+    decision = decision_agent(state)
+    final_state = {**state, **decision}
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        json.dump(result["result"], f, indent=4)
+        json.dump(final_state["result"], f, indent=4)
 
-    return result
+    return final_state
 
 
-def save_approval_gate(result, approval_decision, comments):
-    OUTPUT_DIR.mkdir(exist_ok=True)
+def save_approval_gate(
+    validation_result: dict,
+    approval_decision: str,
+    comments: str,
+) -> dict:
+    """Persist the human reviewer's final decision alongside validation data."""
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     payload = {
-        "validation_result": result["result"],
+        "validation_result": validation_result["result"],
         "approval_gate": {
             "decision": approval_decision,
             "comments": comments,
+            "reviewed_at": datetime.utcnow().isoformat() + "Z",
         },
     }
     with open(APPROVAL_FILE, "w", encoding="utf-8") as f:
@@ -193,4 +431,4 @@ def save_approval_gate(result, approval_decision, comments):
 
 
 if __name__ == "__main__":
-    print("This module is used by the UI. Run app.py to start the web interface.")
+    print("Run `streamlit run app.py` to launch the web interface.")
