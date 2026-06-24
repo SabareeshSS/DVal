@@ -14,13 +14,12 @@ except ImportError:
     from langchain_community.chat_models import ChatOllama  # type: ignore
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR   = Path(__file__).resolve().parent
 OUTPUT_DIR = BASE_DIR / "output"
-OUTPUT_FILE = OUTPUT_DIR / "result.json"
+OUTPUT_FILE   = OUTPUT_DIR / "result.json"
 APPROVAL_FILE = OUTPUT_DIR / "approval_gate.json"
 
 ProgressFn = Optional[Callable[[int, str], None]]
-
 
 # ---------------------------------------------------------------------------
 # Rule Loading
@@ -35,20 +34,15 @@ def load_validation_rules() -> dict:
 
 VALIDATION_RULES = load_validation_rules()
 
-
 # ---------------------------------------------------------------------------
 # Ollama Helpers
 # ---------------------------------------------------------------------------
 
 def get_installed_ollama_models() -> list:
-    """Return a list of locally installed Ollama model names."""
     try:
         result = subprocess.run(
             ["ollama", "list"],
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=10,
+            capture_output=True, text=True, check=True, timeout=10,
         )
         lines = [ln.strip() for ln in result.stdout.splitlines() if ln.strip()]
         if len(lines) <= 1:
@@ -67,19 +61,17 @@ def get_llm(model_name: str = None):
     selected = model_name or os.getenv("OLLAMA_MODEL") or "llama3.2:latest"
     return ChatOllama(model=selected, base_url="http://localhost:11434")
 
-
 # ---------------------------------------------------------------------------
 # JSON Parsing
 # ---------------------------------------------------------------------------
 
 def parse_json_response(response_text: str) -> dict:
-    text = response_text if isinstance(response_text, str) else str(response_text)
+    text  = response_text if isinstance(response_text, str) else str(response_text)
     start = text.find("{")
-    end = text.rfind("}")
+    end   = text.rfind("}")
     if start == -1 or end == -1 or end <= start:
         raise ValueError(f"No valid JSON object found in model output:\n{text}")
     return json.loads(text[start: end + 1])
-
 
 # ---------------------------------------------------------------------------
 # Fallback Validators
@@ -93,8 +85,8 @@ def _clause_names() -> list:
 def fallback_tenant_validation() -> dict:
     return {
         "tenant_missing_clauses": _clause_names(),
-        "tenant_found_clauses": [],
-        "tenant_status": "FAILED",
+        "tenant_found_clauses":   [],
+        "tenant_status":          "FAILED",
     }
 
 
@@ -117,7 +109,6 @@ def fallback_insurer_validation() -> dict:
         "insurer_status": "FAILED",
     }
 
-
 # ---------------------------------------------------------------------------
 # LLM Call Wrapper
 # ---------------------------------------------------------------------------
@@ -128,25 +119,21 @@ def call_model_with_fallback(
     model_name: str = None,
 ) -> dict:
     try:
-        llm = get_llm(model_name)
-        raw = llm.invoke(prompt)
+        llm     = get_llm(model_name)
+        raw     = llm.invoke(prompt)
         content = raw.content if hasattr(raw, "content") else str(raw)
         return parse_json_response(content)
     except Exception as exc:
         print(f"[WARN] LLM call failed ({exc}). Using deterministic fallback.")
         return fallback_fn()
 
-
 # ---------------------------------------------------------------------------
 # PDF Extraction
 # ---------------------------------------------------------------------------
 
-def extract_pdf_text_from_bytes(
-    pdf_bytes: bytes,
-    filename: str = "document.pdf",
-) -> str:
-    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-    pages = [page.get_text() for page in doc]
+def extract_pdf_text_from_bytes(pdf_bytes: bytes, filename: str = "document.pdf") -> str:
+    doc       = fitz.open(stream=pdf_bytes, filetype="pdf")
+    pages     = [page.get_text() for page in doc]
     doc.close()
     full_text = "\n".join(pages)
     if not full_text.strip():
@@ -156,20 +143,18 @@ def extract_pdf_text_from_bytes(
         )
     return full_text
 
-
 # ---------------------------------------------------------------------------
-# Agents
+# Individual Agents
 # ---------------------------------------------------------------------------
 
 def tenant_agent(state: dict, model_name: str = None) -> dict:
-    """Validate required tenant clauses against rules.yaml."""
-    clauses = VALIDATION_RULES.get("tenant_rules", {}).get("required_clauses", [])
+    """Always runs fresh — never skips."""
+    clauses    = VALIDATION_RULES.get("tenant_rules", {}).get("required_clauses", [])
     clause_list = [
         {"name": c["name"], "description": c.get("description", "").strip()}
         if isinstance(c, dict) else {"name": c, "description": ""}
         for c in clauses
     ]
-
     prompt = f"""
 You are a Tenant Compliance Agent reviewing a residential rental agreement.
 
@@ -191,45 +176,29 @@ Instructions:
 - Return ONLY a valid JSON object with these exact keys:
   {{
     "tenant_missing_clauses": ["<clause name>", ...],
-    "tenant_found_clauses": ["<clause name>", ...],
-    "tenant_status": "OK" or "FAILED"
+    "tenant_found_clauses":   ["<clause name>", ...],
+    "tenant_status":          "OK" or "FAILED"
   }}
 - "tenant_status" must be "OK" only if tenant_missing_clauses is empty.
 - Do NOT include any explanation outside the JSON.
 """
-    parsed = call_model_with_fallback(
-        prompt,
-        fallback_tenant_validation,
-        model_name,
-    )
-
+    parsed = call_model_with_fallback(prompt, fallback_tenant_validation, model_name)
     return {
         **state,
         "tenant_missing_clauses": parsed.get("tenant_missing_clauses", []),
-        "tenant_found_clauses": parsed.get("tenant_found_clauses", []),
-        "tenant_status": parsed.get("tenant_status", "FAILED"),
+        "tenant_found_clauses":   parsed.get("tenant_found_clauses",   []),
+        "tenant_status":          parsed.get("tenant_status",          "FAILED"),
     }
 
 
 def landlord_agent(state: dict, model_name: str = None) -> dict:
-    """Run landlord checks; skips automatically if tenant stage failed."""
-    if state.get("tenant_status") == "FAILED":
-        return {
-            **state,
-            "landlord_status": "SKIPPED",
-            "landlord_issues": [
-                "Skipped — Tenant validation failed. "
-                "Resolve tenant clause issues before landlord review."
-            ],
-        }
-
-    checks = VALIDATION_RULES.get("landlord_rules", {}).get("checks", [])
+    """Always runs fresh — caller decides whether to invoke."""
+    checks     = VALIDATION_RULES.get("landlord_rules", {}).get("checks", [])
     check_list = [
         {"name": c["name"], "description": c.get("description", "").strip()}
         if isinstance(c, dict) else {"name": c, "description": ""}
         for c in checks
     ]
-
     prompt = f"""
 You are a Landlord Compliance Agent reviewing a residential rental agreement.
 
@@ -256,12 +225,7 @@ Instructions:
 - "landlord_status" must be "OK" only if landlord_issues is empty.
 - Do NOT include any explanation outside the JSON.
 """
-    parsed = call_model_with_fallback(
-        prompt,
-        fallback_landlord_validation,
-        model_name,
-    )
-
+    parsed = call_model_with_fallback(prompt, fallback_landlord_validation, model_name)
     return {
         **state,
         "landlord_issues": parsed.get("landlord_issues", []),
@@ -270,28 +234,13 @@ Instructions:
 
 
 def insurer_agent(state: dict, model_name: str = None) -> dict:
-    """Run insurer checks; skips if any prior stage failed or was skipped."""
-    prior_failed = (
-        state.get("tenant_status") == "FAILED"
-        or state.get("landlord_status") in ("FAILED", "SKIPPED")
-    )
-    if prior_failed:
-        return {
-            **state,
-            "insurer_status": "SKIPPED",
-            "insurer_issues": [
-                "Skipped — One or more prior validation stages failed. "
-                "Resolve Tenant and Landlord issues first."
-            ],
-        }
-
-    checks = VALIDATION_RULES.get("insurer_rules", {}).get("checks", [])
+    """Always runs fresh — caller decides whether to invoke."""
+    checks     = VALIDATION_RULES.get("insurer_rules", {}).get("checks", [])
     check_list = [
         {"name": c["name"], "description": c.get("description", "").strip()}
         if isinstance(c, dict) else {"name": c, "description": ""}
         for c in checks
     ]
-
     prompt = f"""
 You are an Insurance Compliance Agent reviewing a residential rental agreement.
 
@@ -318,12 +267,7 @@ Instructions:
 - "insurer_status" must be "OK" only if insurer_issues is empty.
 - Do NOT include any explanation outside the JSON.
 """
-    parsed = call_model_with_fallback(
-        prompt,
-        fallback_insurer_validation,
-        model_name,
-    )
-
+    parsed = call_model_with_fallback(prompt, fallback_insurer_validation, model_name)
     return {
         **state,
         "insurer_issues": parsed.get("insurer_issues", []),
@@ -332,108 +276,147 @@ Instructions:
 
 
 def decision_agent(state: dict) -> dict:
-    """Aggregate all agent results into a final decision payload."""
-    t_status = state.get("tenant_status", "FAILED")
+    """Aggregate all agent results into a final APPROVED / REJECTED decision."""
+    t_status = state.get("tenant_status",   "FAILED")
     l_status = state.get("landlord_status", "FAILED")
-    i_status = state.get("insurer_status", "FAILED")
+    i_status = state.get("insurer_status",  "FAILED")
 
-    all_ok = t_status == "OK" and l_status == "OK" and i_status == "OK"
+    _ok = {"OK", "OK_OVERRIDDEN"}
+    all_ok   = t_status in _ok and l_status in _ok and i_status in _ok
     decision = "APPROVED" if all_ok else "REJECTED"
 
     if all_ok:
         reason = (
-            "All three validation stages (Tenant, Landlord, Insurer) passed "
-            "successfully. The document meets all required standards."
+            "All three validation stages passed successfully "
+            "(or were manually overridden by a reviewer). "
+            "The document meets all required standards."
         )
     else:
         parts = []
-        if t_status != "OK":
+        if t_status not in _ok:
             parts.append(f"Tenant stage: {t_status}")
-        if l_status != "OK":
+        if l_status not in _ok:
             parts.append(f"Landlord stage: {l_status}")
-        if i_status != "OK":
+        if i_status not in _ok:
             parts.append(f"Insurer stage: {i_status}")
         reason = (
             "Document rejected due to validation failures — "
             + ", ".join(parts)
-            + ". Please review the detailed issues in each stage."
+            + ". Please review the detailed issues in each stage "
+            "or use the Human Approval Gate to override."
         )
 
-    result_payload = {
-        "decision": decision,
-        "reason": reason,
-        "tenant_status": t_status,
-        "landlord_status": l_status,
-        "insurer_status": i_status,
-        "details": {
-            "tenant": {
-                "missing": state.get("tenant_missing_clauses", []),
-                "found": state.get("tenant_found_clauses", []),
+    return {
+        "result": {
+            "decision":        decision,
+            "reason":          reason,
+            "tenant_status":   t_status,
+            "landlord_status": l_status,
+            "insurer_status":  i_status,
+            "details": {
+                "tenant":   {
+                    "missing": state.get("tenant_missing_clauses", []),
+                    "found":   state.get("tenant_found_clauses",   []),
+                },
+                "landlord": {"issues": state.get("landlord_issues", [])},
+                "insurer":  {"issues": state.get("insurer_issues",  [])},
             },
-            "landlord": {
-                "issues": state.get("landlord_issues", []),
-            },
-            "insurer": {
-                "issues": state.get("insurer_issues", []),
-            },
-        },
-        "processed_at": datetime.utcnow().isoformat() + "Z",
+            "processed_at": datetime.utcnow().isoformat() + "Z",
+            "override_log": state.get("override_log", []),
+        }
     }
-    return {"result": result_payload}
-
 
 # ---------------------------------------------------------------------------
-# Orchestrator  ←  progress_callback fires BEFORE each blocking LLM call
+# Orchestrator
 # ---------------------------------------------------------------------------
+
+_OK_SET = {"OK", "OK_OVERRIDDEN"}
+
 
 def run_document_validation(
-    pdf_bytes: bytes,
-    filename: str = "document.pdf",
-    model_name: str = None,
+    pdf_bytes: bytes = None,
+    filename:  str   = "document.pdf",
+    model_name: str  = None,
     progress_callback: ProgressFn = None,
+    initial_state: dict = None,
 ) -> dict:
     """
-    Run the full multi-agent validation pipeline.
+    Sequential multi-agent pipeline with resume support.
 
-    progress_callback(percent: int, message: str) is called immediately
-    before each blocking operation so the UI reflects the correct stage
-    while the LLM is actually working.
+    • Pass initial_state=None  → fresh run from PDF extraction.
+    • Pass initial_state=<dict> → resume from a previously saved state
+      (used after OVERRIDE or REVERT actions from the Human Approval Gate).
+
+    progress_callback(pct, msg) is fired BEFORE each blocking LLM call
+    so the UI updates immediately.
     """
 
     def _cb(pct: int, msg: str) -> None:
         if progress_callback:
             progress_callback(pct, msg)
 
-    # ── Stage 1: PDF extraction ──────────────────────────────────────────
-    _cb(10, "📄 Extracting text from PDF…")
-    extracted_text = extract_pdf_text_from_bytes(pdf_bytes, filename)
-    state: dict = {"text": extracted_text, "filename": filename}
+    # ── Stage 1: PDF Extraction ──────────────────────────────────────────
+    if initial_state is None:
+        _cb(10, "📄 Extracting text from PDF…")
+        text  = extract_pdf_text_from_bytes(pdf_bytes, filename)
+        state = {
+            "text":         text,
+            "filename":     filename,
+            "override_log": [],
+        }
+    else:
+        # Resume: carry forward the extracted text and override history
+        state = dict(initial_state)
+        state.setdefault("override_log", [])
+        _cb(10, "📄 Resuming from saved pipeline state…")
 
     # ── Stage 2: Tenant Agent ────────────────────────────────────────────
-    _cb(25, "👤 Tenant Agent — validating required clauses…")
-    state = tenant_agent(state, model_name)
+    if state.get("tenant_status") in _OK_SET:
+        _cb(25, "👤 Tenant Agent — already passed / overridden, skipping re-run…")
+    else:
+        _cb(25, "👤 Tenant Agent — validating required clauses…")
+        state = tenant_agent(state, model_name)
 
     # ── Stage 3: Landlord Agent ──────────────────────────────────────────
-    if state.get("tenant_status") == "FAILED":
-        _cb(55, "🏠 Landlord Agent — skipped (tenant stage failed)…")
+    if state.get("tenant_status") not in _OK_SET:
+        # Tenant still failing — landlord cannot run
+        _cb(55, "🏠 Landlord Agent — skipped (Tenant stage not cleared)…")
+        state.update({
+            "landlord_status": "SKIPPED",
+            "landlord_issues": [
+                "Skipped — Tenant validation has not been cleared. "
+                "Use the Human Approval Gate to override the Tenant stage first."
+            ],
+        })
+    elif state.get("landlord_status") in _OK_SET:
+        _cb(55, "🏠 Landlord Agent — already passed / overridden, skipping re-run…")
     else:
         _cb(55, "🏠 Landlord Agent — running compliance checks…")
-    state = landlord_agent(state, model_name)
+        state = landlord_agent(state, model_name)
 
     # ── Stage 4: Insurer Agent ───────────────────────────────────────────
-    prior_failed = (
-        state.get("tenant_status") == "FAILED"
-        or state.get("landlord_status") in ("FAILED", "SKIPPED")
+    prior_clear = (
+        state.get("tenant_status")   in _OK_SET
+        and state.get("landlord_status") in _OK_SET
     )
-    if prior_failed:
-        _cb(80, "🛡️ Insurer Agent — skipped (prior stage failed)…")
+    if not prior_clear:
+        _cb(80, "🛡️ Insurer Agent — skipped (prior stages not cleared)…")
+        state.update({
+            "insurer_status": "SKIPPED",
+            "insurer_issues": [
+                "Skipped — Tenant and/or Landlord stages have not been cleared. "
+                "Resolve or override those stages first."
+            ],
+        })
+    elif state.get("insurer_status") in _OK_SET:
+        _cb(80, "🛡️ Insurer Agent — already passed / overridden, skipping re-run…")
     else:
         _cb(80, "🛡️ Insurer Agent — validating signatures & coverage…")
-    state = insurer_agent(state, model_name)
+        state = insurer_agent(state, model_name)
 
-    # ── Stage 5: Decision Agent (no LLM — instant) ───────────────────────
+    # ── Stage 5: Decision Agent ──────────────────────────────────────────
     _cb(95, "⚖️ Decision Agent — aggregating results…")
-    decision = decision_agent(state)
+    decision    = decision_agent(state)
     final_state = {**state, **decision}
 
     # ── Persist ──────────────────────────────────────────────────────────
@@ -442,7 +425,6 @@ def run_document_validation(
         json.dump(final_state["result"], f, indent=4)
 
     return final_state
-
 
 # ---------------------------------------------------------------------------
 # Approval Gate
@@ -453,13 +435,12 @@ def save_approval_gate(
     approval_decision: str,
     comments: str,
 ) -> dict:
-    """Persist the human reviewer's final decision alongside validation data."""
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     payload = {
         "validation_result": validation_result["result"],
         "approval_gate": {
-            "decision": approval_decision,
-            "comments": comments,
+            "decision":    approval_decision,
+            "comments":    comments,
             "reviewed_at": datetime.utcnow().isoformat() + "Z",
         },
     }
