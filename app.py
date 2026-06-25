@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# CSS — fully theme-aware, dark + light mode safe
+# CSS
 # ---------------------------------------------------------------------------
 st.markdown("""
 <style>
@@ -53,11 +53,6 @@ st.markdown("""
     opacity: 0.9 !important;
     transform: translateY(-1px) !important;
 }
-[data-testid="stSidebar"] .stSelectbox label,
-[data-testid="stSidebar"] .stFileUploader label {
-    color: #94A3B8 !important;
-    font-size: 0.8rem !important;
-}
 [data-testid="stSidebar"] [data-testid="stFileUploader"] {
     background: #1E293B !important;
     border-radius: 8px !important;
@@ -72,424 +67,296 @@ st.markdown("""
     color: #F1F5F9 !important;
     background: #1E293B !important;
 }
-
-/* Sidebar divider */
 [data-testid="stSidebar"] hr {
     border-color: #1E293B !important;
     margin: 0.8rem 0 !important;
 }
-
-/* Workflow step dots */
 .wf-step {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    padding: 0.35rem 0;
-    font-size: 0.83rem;
-    color: #94A3B8;
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.35rem 0; font-size: 0.83rem; color: #94A3B8;
 }
 .wf-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #4A6CF7;
-    flex-shrink: 0;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #4A6CF7; flex-shrink: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HEADER BANNER
+   HEADER
 ═══════════════════════════════════════════════════════════════ */
 .app-header {
     background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #1E293B 100%);
-    border-radius: 16px;
-    padding: 2rem 2.5rem;
-    margin-bottom: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1.4rem;
+    border-radius: 16px; padding: 2rem 2.5rem; margin-bottom: 2rem;
+    display: flex; align-items: center; gap: 1.4rem;
     border: 1px solid #1E3A5F;
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
-.app-header-icon { font-size: 3rem; line-height: 1; }
 .app-header h1 {
-    color: #F1F5F9 !important;
-    font-size: 1.85rem;
-    font-weight: 800;
-    margin: 0 0 0.3rem 0;
-    letter-spacing: -0.02em;
+    color: #F1F5F9 !important; font-size: 1.85rem; font-weight: 800;
+    margin: 0 0 0.3rem 0; letter-spacing: -0.02em;
 }
-.app-header p {
-    color: #64B5F6 !important;
-    margin: 0;
-    font-size: 0.92rem;
-    font-weight: 400;
-}
+.app-header p { color: #64B5F6 !important; margin: 0; font-size: 0.92rem; }
 
 /* ═══════════════════════════════════════════════════════════════
    SECTION TITLES
 ═══════════════════════════════════════════════════════════════ */
 .sec-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-color);
-    margin: 2rem 0 1rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #4A6CF7;
+    font-size: 1rem; font-weight: 700; color: var(--text-color);
+    margin: 2rem 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;
+    padding-bottom: 0.5rem; border-bottom: 2px solid #4A6CF7;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    AGENT CARDS
 ═══════════════════════════════════════════════════════════════ */
 .agent-card {
-    border-radius: 14px;
-    padding: 1.4rem 1.5rem;
-    height: 100%;
+    border-radius: 14px; padding: 1.4rem 1.5rem; height: 100%;
     border: 1px solid rgba(255,255,255,0.06);
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
 }
 .agent-card-tenant   { background: linear-gradient(145deg, #0F2744, #0D1B2A); }
 .agent-card-landlord { background: linear-gradient(145deg, #1A1A2E, #16213E); }
 .agent-card-insurer  { background: linear-gradient(145deg, #0D2137, #0A1628); }
-
 .agent-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
 }
 .agent-card-tenant::before   { background: linear-gradient(90deg, #4A6CF7, #60A5FA); }
 .agent-card-landlord::before { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
 .agent-card-insurer::before  { background: linear-gradient(90deg, #06B6D4, #22D3EE); }
-
 .agent-card-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #F1F5F9 !important;
-    margin-bottom: 0.7rem;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+    font-size: 0.95rem; font-weight: 700; color: #F1F5F9 !important;
+    margin-bottom: 0.7rem; display: flex; align-items: center; gap: 0.4rem;
 }
 .agent-card-desc {
-    font-size: 0.78rem;
-    color: #94A3B8 !important;
-    margin: 0.5rem 0 0.8rem 0;
-    line-height: 1.5;
+    font-size: 0.78rem; color: #94A3B8 !important;
+    margin: 0.5rem 0 0.8rem 0; line-height: 1.5;
 }
-.agent-card-stat {
-    font-size: 0.82rem;
-    color: #CBD5E1 !important;
-    margin: 0;
-}
-.agent-card-stat strong {
-    color: #F1F5F9 !important;
-}
+.agent-card-stat { font-size: 0.82rem; color: #CBD5E1 !important; margin: 0; }
+.agent-card-stat strong { color: #F1F5F9 !important; }
 
 /* ═══════════════════════════════════════════════════════════════
-   STATUS BADGES
+   BADGES
 ═══════════════════════════════════════════════════════════════ */
 .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.25rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.8rem;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.25rem 0.8rem; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.05em; margin-bottom: 0.8rem;
 }
-.badge-ok         { background: #064E3B; color: #6EE7B7 !important; border: 1px solid #065F46; }
-.badge-overridden { background: #1E3A5F; color: #93C5FD !important; border: 1px solid #1D4ED8; }
-.badge-failed     { background: #450A0A; color: #FCA5A5 !important; border: 1px solid #7F1D1D; }
-.badge-skipped    { background: #422006; color: #FCD34D !important; border: 1px solid #78350F; }
-.badge-unknown    { background: #1E293B; color: #94A3B8 !important; border: 1px solid #334155; }
+.badge-ok         { background:#064E3B; color:#6EE7B7 !important; border:1px solid #065F46; }
+.badge-overridden { background:#1E3A5F; color:#93C5FD !important; border:1px solid #1D4ED8; }
+.badge-failed     { background:#450A0A; color:#FCA5A5 !important; border:1px solid #7F1D1D; }
+.badge-skipped    { background:#422006; color:#FCD34D !important; border:1px solid #78350F; }
+.badge-unknown    { background:#1E293B; color:#94A3B8 !important; border:1px solid #334155; }
 
 /* ═══════════════════════════════════════════════════════════════
-   METRICS ROW
+   METRICS
 ═══════════════════════════════════════════════════════════════ */
-.metric-card {
-    background: #1E293B;
-    border-radius: 12px;
-    padding: 1.1rem 1.2rem;
-    text-align: center;
-    border: 1px solid #334155;
+[data-testid="stMetric"] {
+    background: #1E293B; border-radius: 12px;
+    padding: 1rem 1.2rem; border: 1px solid #334155;
 }
-.metric-card-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #F1F5F9 !important;
-    line-height: 1;
-    margin-bottom: 0.3rem;
+[data-testid="stMetricLabel"] {
+    color: #64748B !important; font-size: 0.75rem !important;
+    font-weight: 600 !important; text-transform: uppercase; letter-spacing: 0.05em;
 }
-.metric-card-label {
-    font-size: 0.75rem;
-    color: #64748B !important;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+[data-testid="stMetricValue"] {
+    color: #F1F5F9 !important; font-size: 1.8rem !important; font-weight: 800 !important;
 }
-.metric-passed  .metric-card-value { color: #34D399 !important; }
-.metric-failed  .metric-card-value { color: #F87171 !important; }
-.metric-skipped .metric-card-value { color: #FBBF24 !important; }
-.metric-override .metric-card-value { color: #60A5FA !important; }
 
 /* ═══════════════════════════════════════════════════════════════
    DECISION BANNERS
 ═══════════════════════════════════════════════════════════════ */
-.decision-banner {
-    border-radius: 14px;
-    padding: 1.5rem 1.8rem;
+.decision-banner { border-radius: 14px; padding: 1.5rem 1.8rem; margin-top: 0.5rem; border: 1px solid; }
+.decision-approved { background: linear-gradient(135deg,#052E16,#064E3B); border-color:#065F46; }
+.decision-rejected { background: linear-gradient(135deg,#2D0A0A,#450A0A); border-color:#7F1D1D; }
+.decision-title { font-size:1.15rem; font-weight:800; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem; }
+.decision-approved .decision-title { color:#6EE7B7 !important; }
+.decision-rejected .decision-title { color:#FCA5A5 !important; }
+.decision-reason { font-size:0.88rem; line-height:1.65; }
+.decision-approved .decision-reason { color:#A7F3D0 !important; }
+.decision-rejected .decision-reason { color:#FECACA !important; }
+.decision-ts { font-size:0.75rem; margin-top:0.7rem; opacity:0.6; }
+.decision-approved .decision-ts { color:#6EE7B7 !important; }
+.decision-rejected .decision-ts { color:#FCA5A5 !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   DEBUG PANEL
+═══════════════════════════════════════════════════════════════ */
+.debug-panel {
+    background: #020617;
+    border-radius: 12px;
+    border: 1px solid #1E293B;
+    padding: 0;
+    overflow: hidden;
     margin-top: 0.5rem;
-    border: 1px solid;
 }
-.decision-approved {
-    background: linear-gradient(135deg, #052E16, #064E3B);
-    border-color: #065F46;
-}
-.decision-rejected {
-    background: linear-gradient(135deg, #2D0A0A, #450A0A);
-    border-color: #7F1D1D;
-}
-.decision-title {
-    font-size: 1.15rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
+.debug-header {
+    background: #0F172A;
+    padding: 0.7rem 1.2rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    border-bottom: 1px solid #1E293B;
 }
-.decision-approved .decision-title { color: #6EE7B7 !important; }
-.decision-rejected .decision-title { color: #FCA5A5 !important; }
-.decision-reason {
-    font-size: 0.88rem;
-    line-height: 1.65;
+.debug-header-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748B !important;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
 }
-.decision-approved .decision-reason { color: #A7F3D0 !important; }
-.decision-rejected .decision-reason { color: #FECACA !important; }
-.decision-ts {
+.debug-body { padding: 1rem 1.2rem; }
+
+.debug-section {
+    margin-bottom: 1.2rem;
+}
+.debug-section:last-child { margin-bottom: 0; }
+
+.debug-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #475569 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.35rem;
+}
+
+.debug-agent-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.debug-tenant   { background:#0F2744; color:#60A5FA !important; }
+.debug-landlord { background:#1A1A2E; color:#A78BFA !important; }
+.debug-insurer  { background:#0D2137; color:#22D3EE !important; }
+
+.debug-kv {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 0.3rem;
+    align-items: flex-start;
+}
+.debug-key {
     font-size: 0.75rem;
-    margin-top: 0.7rem;
-    opacity: 0.6;
+    font-weight: 600;
+    color: #475569 !important;
+    min-width: 140px;
+    flex-shrink: 0;
+    padding-top: 0.05rem;
 }
-.decision-approved .decision-ts { color: #6EE7B7 !important; }
-.decision-rejected .decision-ts { color: #FCA5A5 !important; }
+.debug-val {
+    font-size: 0.78rem;
+    color: #CBD5E1 !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    word-break: break-all;
+    line-height: 1.5;
+}
+.debug-val-ok     { color: #34D399 !important; font-weight: 700; }
+.debug-val-failed { color: #F87171 !important; font-weight: 700; }
+.debug-val-skip   { color: #FBBF24 !important; font-weight: 700; }
+.debug-val-ovr    { color: #60A5FA !important; font-weight: 700; }
+
+.debug-list-item {
+    font-size: 0.76rem;
+    color: #94A3B8 !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid #0F172A;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+.debug-list-item:last-child { border-bottom: none; }
+.debug-bullet-found   { color: #34D399 !important; flex-shrink: 0; }
+.debug-bullet-missing { color: #F87171 !important; flex-shrink: 0; }
+.debug-bullet-issue   { color: #FBBF24 !important; flex-shrink: 0; }
+
+.debug-divider {
+    border: none;
+    border-top: 1px solid #1E293B;
+    margin: 1rem 0;
+}
+
+.debug-raw-toggle {
+    font-size: 0.72rem;
+    color: #334155 !important;
+    font-style: italic;
+    margin-top: 0.5rem;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    OVERRIDE LOG
 ═══════════════════════════════════════════════════════════════ */
-.log-wrap {
-    background: #0F172A;
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    border: 1px solid #1E293B;
-}
-.log-entry {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    padding: 0.7rem 0;
-    border-bottom: 1px solid #1E293B;
-}
-.log-entry:last-child { border-bottom: none; }
-.log-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #4A6CF7;
-    margin-top: 0.35rem;
-    flex-shrink: 0;
-}
-.log-action {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #93C5FD !important;
-}
-.log-stage {
-    font-size: 0.78rem;
-    color: #64748B !important;
-}
-.log-comment {
-    font-size: 0.8rem;
-    color: #CBD5E1 !important;
-    margin-top: 0.15rem;
-    font-style: italic;
-}
-.log-ts {
-    font-size: 0.72rem;
-    color: #475569 !important;
-    margin-top: 0.15rem;
-}
+.log-wrap { background:#0F172A; border-radius:12px; padding:1rem 1.2rem; border:1px solid #1E293B; }
+.log-entry { display:flex; align-items:flex-start; gap:0.8rem; padding:0.7rem 0; border-bottom:1px solid #1E293B; }
+.log-entry:last-child { border-bottom:none; }
+.log-dot { width:8px; height:8px; border-radius:50%; background:#4A6CF7; margin-top:0.35rem; flex-shrink:0; }
+.log-action { font-size:0.8rem; font-weight:700; color:#93C5FD !important; }
+.log-stage  { font-size:0.78rem; color:#64748B !important; }
+.log-comment{ font-size:0.8rem; color:#CBD5E1 !important; margin-top:0.15rem; font-style:italic; }
+.log-ts     { font-size:0.72rem; color:#475569 !important; margin-top:0.15rem; }
 
 /* ═══════════════════════════════════════════════════════════════
    APPROVAL GATE
 ═══════════════════════════════════════════════════════════════ */
 .gate-wrap {
-    background: #0F172A;
-    border-radius: 14px;
-    padding: 1.6rem 1.8rem;
-    border: 1px solid #1E293B;
-    margin-top: 0.5rem;
+    background:#0F172A; border-radius:14px; padding:1.6rem 1.8rem;
+    border:1px solid #1E293B; margin-top:0.5rem;
 }
-.gate-intro {
-    font-size: 0.88rem;
-    color: #94A3B8 !important;
-    line-height: 1.6;
-    margin-bottom: 1.2rem;
-}
+.gate-intro { font-size:0.88rem; color:#94A3B8 !important; line-height:1.6; margin-bottom:1.2rem; }
 
-/* Radio label fix */
-[data-testid="stRadio"] label {
-    color: var(--text-color) !important;
-    font-size: 0.88rem !important;
-}
-[data-testid="stRadio"] > div {
-    gap: 0.5rem !important;
-}
-
-/* Textarea */
+[data-testid="stRadio"] label { color:var(--text-color) !important; font-size:0.88rem !important; }
 [data-testid="stTextArea"] textarea {
-    background: #1E293B !important;
-    color: #F1F5F9 !important;
-    border: 1.5px solid #334155 !important;
-    border-radius: 10px !important;
-    font-size: 0.88rem !important;
+    background:#1E293B !important; color:#F1F5F9 !important;
+    border:1.5px solid #334155 !important; border-radius:10px !important; font-size:0.88rem !important;
 }
-[data-testid="stTextArea"] textarea::placeholder {
-    color: #475569 !important;
-}
-[data-testid="stTextArea"] label {
-    color: #94A3B8 !important;
-    font-size: 0.82rem !important;
-    font-weight: 600 !important;
-}
-
-/* Primary form button */
-[data-testid="stForm"] .stButton > button[kind="primaryFormSubmit"],
-[data-testid="stForm"] button[type="submit"] {
-    background: linear-gradient(135deg, #4A6CF7, #6A3DE8) !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    border-radius: 10px !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
-    padding: 0.6rem 1.4rem !important;
-    box-shadow: 0 4px 14px rgba(74,108,247,0.4) !important;
-    transition: opacity 0.2s !important;
-}
-[data-testid="stForm"] .stButton > button[kind="primaryFormSubmit"]:hover {
-    opacity: 0.88 !important;
-}
+[data-testid="stTextArea"] textarea::placeholder { color:#475569 !important; }
+[data-testid="stTextArea"] label { color:#94A3B8 !important; font-size:0.82rem !important; font-weight:600 !important; }
 
 /* ═══════════════════════════════════════════════════════════════
-   CONFIRMATION BANNER
+   CONFIRMATION
 ═══════════════════════════════════════════════════════════════ */
 .confirm-approved {
-    background: linear-gradient(135deg, #052E16, #064E3B);
-    border: 1px solid #065F46;
-    border-radius: 14px;
-    padding: 1.4rem 1.8rem;
-    color: #6EE7B7 !important;
-    font-size: 1rem;
-    font-weight: 700;
+    background:linear-gradient(135deg,#052E16,#064E3B); border:1px solid #065F46;
+    border-radius:14px; padding:1.4rem 1.8rem; color:#6EE7B7 !important;
+    font-size:1rem; font-weight:700;
 }
 .confirm-rejected {
-    background: linear-gradient(135deg, #2D0A0A, #450A0A);
-    border: 1px solid #7F1D1D;
-    border-radius: 14px;
-    padding: 1.4rem 1.8rem;
-    color: #FCA5A5 !important;
-    font-size: 1rem;
-    font-weight: 700;
+    background:linear-gradient(135deg,#2D0A0A,#450A0A); border:1px solid #7F1D1D;
+    border-radius:14px; padding:1.4rem 1.8rem; color:#FCA5A5 !important;
+    font-size:1rem; font-weight:700;
 }
-.confirm-note {
-    font-size: 0.85rem;
-    font-weight: 400;
-    margin-top: 0.5rem;
-    opacity: 0.85;
-}
+.confirm-note { font-size:0.85rem; font-weight:400; margin-top:0.5rem; opacity:0.85; }
 
 /* ═══════════════════════════════════════════════════════════════
    EMPTY STATE
 ═══════════════════════════════════════════════════════════════ */
 .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: #0F172A;
-    border-radius: 16px;
-    border: 1.5px dashed #1E293B;
-    margin-top: 1rem;
+    text-align:center; padding:4rem 2rem; background:#0F172A;
+    border-radius:16px; border:1.5px dashed #1E293B; margin-top:1rem;
 }
-.empty-state-icon { font-size: 3.5rem; margin-bottom: 1rem; }
-.empty-state-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #CBD5E1 !important;
-    margin-bottom: 0.5rem;
-}
-.empty-state-sub {
-    font-size: 0.88rem;
-    color: #475569 !important;
-    line-height: 1.6;
-}
-.empty-state-sub strong { color: #64748B !important; }
+.empty-state-icon  { font-size:3.5rem; margin-bottom:1rem; }
+.empty-state-title { font-size:1.1rem; font-weight:700; color:#CBD5E1 !important; margin-bottom:0.5rem; }
+.empty-state-sub   { font-size:0.88rem; color:#475569 !important; line-height:1.6; }
+.empty-state-sub strong { color:#64748B !important; }
 
 /* ═══════════════════════════════════════════════════════════════
-   EXPANDER OVERRIDES
+   EXPANDER
 ═══════════════════════════════════════════════════════════════ */
 [data-testid="stExpander"] {
-    background: #1E293B !important;
-    border: 1px solid #334155 !important;
-    border-radius: 10px !important;
+    background:#1E293B !important; border:1px solid #334155 !important; border-radius:10px !important;
 }
-[data-testid="stExpander"] summary {
-    color: #CBD5E1 !important;
-    font-weight: 600 !important;
-    font-size: 0.85rem !important;
-}
-[data-testid="stExpander"] summary:hover {
-    color: #F1F5F9 !important;
-}
+[data-testid="stExpander"] summary { color:#CBD5E1 !important; font-weight:600 !important; font-size:0.85rem !important; }
 [data-testid="stExpander"] p,
 [data-testid="stExpander"] li,
-[data-testid="stExpander"] span {
-    color: #CBD5E1 !important;
-    font-size: 0.85rem !important;
-}
+[data-testid="stExpander"] span { color:#CBD5E1 !important; font-size:0.85rem !important; }
 
-/* ═══════════════════════════════════════════════════════════════
-   PROGRESS BAR TEXT
-═══════════════════════════════════════════════════════════════ */
-[data-testid="stStatusWidget"] {
-    color: #CBD5E1 !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   METRIC WIDGET NATIVE
-═══════════════════════════════════════════════════════════════ */
-[data-testid="stMetric"] {
-    background: #1E293B;
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    border: 1px solid #334155;
-}
-[data-testid="stMetricLabel"] {
-    color: #64748B !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-[data-testid="stMetricValue"] {
-    color: #F1F5F9 !important;
-    font-size: 1.8rem !important;
-    font-weight: 800 !important;
-}
-
-/* Global link colour */
-a { color: #60A5FA !important; }
+a { color:#60A5FA !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -503,6 +370,8 @@ _DEFAULTS = {
     "pdf_bytes":          None,
     "pdf_name":           None,
     "pipeline_state":     None,
+    "debug_enabled":      False,   # ← new
+    "raw_llm_responses":  {},      # ← new  {agent: raw_text}
 }
 for k, v in _DEFAULTS.items():
     if k not in st.session_state:
@@ -524,6 +393,15 @@ def status_badge(status: str) -> str:
     return f"<span class='badge {cls}'>{label}</span>"
 
 
+def _status_val_class(status: str) -> str:
+    return {
+        "OK":            "debug-val-ok",
+        "OK_OVERRIDDEN": "debug-val-ovr",
+        "FAILED":        "debug-val-failed",
+        "SKIPPED":       "debug-val-skip",
+    }.get(status, "debug-val")
+
+
 def _reset():
     for k, v in _DEFAULTS.items():
         st.session_state[k] = v
@@ -536,9 +414,7 @@ with st.sidebar:
     <div style="text-align:center;padding:1.2rem 0 0.8rem">
         <div style="font-size:2.4rem;margin-bottom:0.4rem">📋</div>
         <div style="font-size:1rem;font-weight:800;color:#F1F5F9">Rental Agreement</div>
-        <div style="font-size:0.75rem;color:#475569;margin-top:0.2rem">
-            Multi-Agent Validator
-        </div>
+        <div style="font-size:0.75rem;color:#475569;margin-top:0.2rem">Multi-Agent Validator</div>
     </div>
     """, unsafe_allow_html=True)
     st.divider()
@@ -546,19 +422,15 @@ with st.sidebar:
     st.markdown(
         "<p style='font-size:0.78rem;font-weight:700;color:#64748B;"
         "text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem'>"
-        "📂 Upload Document</p>",
-        unsafe_allow_html=True,
+        "📂 Upload Document</p>", unsafe_allow_html=True,
     )
-    uploaded_file = st.file_uploader(
-        "PDF", type=["pdf"], label_visibility="collapsed"
-    )
+    uploaded_file = st.file_uploader("PDF", type=["pdf"], label_visibility="collapsed")
 
     st.markdown(
         "<p style='font-size:0.78rem;font-weight:700;color:#64748B;"
         "text-transform:uppercase;letter-spacing:.06em;"
         "margin-bottom:.4rem;margin-top:.8rem'>"
-        "🤖 AI Model</p>",
-        unsafe_allow_html=True,
+        "🤖 AI Model</p>", unsafe_allow_html=True,
     )
     model_options = get_installed_ollama_models()
     model_name = st.selectbox(
@@ -569,21 +441,32 @@ with st.sidebar:
     if not model_options:
         st.markdown(
             "<p style='font-size:0.75rem;color:#F59E0B;margin-top:.3rem'>"
-            "⚠️ No Ollama models detected.</p>",
-            unsafe_allow_html=True,
+            "⚠️ No Ollama models detected.</p>", unsafe_allow_html=True,
         )
 
     st.divider()
     run_button = st.button("🚀  Run Validation Workflow", type="primary")
 
     st.divider()
+
+    # ── Debug toggle ─────────────────────────────────────────────────────
+    st.markdown(
+        "<p style='font-size:0.78rem;font-weight:700;color:#64748B;"
+        "text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem'>"
+        "🛠️ Developer Options</p>", unsafe_allow_html=True,
+    )
+    st.session_state.debug_enabled = st.toggle(
+        "Show Debug Panel",
+        value=st.session_state.debug_enabled,
+    )
+
+    st.divider()
     st.markdown(
         "<p style='font-size:0.78rem;font-weight:700;color:#64748B;"
         "text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem'>"
-        "Pipeline Stages</p>",
-        unsafe_allow_html=True,
+        "Pipeline Stages</p>", unsafe_allow_html=True,
     )
-    for step in [
+    for icon, label in [
         ("📄", "PDF Extraction"),
         ("👤", "Tenant Validation"),
         ("🏠", "Landlord Compliance"),
@@ -592,9 +475,8 @@ with st.sidebar:
         ("🔏", "Human Approval Gate"),
     ]:
         st.markdown(
-            f"<div class='wf-step'>"
-            f"<div class='wf-dot'></div>"
-            f"<span>{step[0]} {step[1]}</span></div>",
+            f"<div class='wf-step'><div class='wf-dot'></div>"
+            f"<span>{icon} {label}</span></div>",
             unsafe_allow_html=True,
         )
 
@@ -603,7 +485,7 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 st.markdown("""
 <div class="app-header">
-    <div class="app-header-icon">📋</div>
+    <div style="font-size:3rem;line-height:1">📋</div>
     <div>
         <h1>Rental Agreement Validator</h1>
         <p>Multi-agent AI pipeline &nbsp;·&nbsp; Tenant &nbsp;·&nbsp;
@@ -625,6 +507,7 @@ if run_button:
         st.session_state.validation_result  = None
         st.session_state.approval_payload   = None
         st.session_state.pipeline_state     = None
+        st.session_state.raw_llm_responses  = {}
         st.rerun()
 
 # ---------------------------------------------------------------------------
@@ -656,6 +539,9 @@ if st.session_state.validation_started and st.session_state.validation_result is
             st.session_state.pipeline_state    = {
                 k: v for k, v in result.items() if k != "result"
             }
+            # Capture raw LLM responses stored in state by main.py
+            st.session_state.raw_llm_responses = result.get("raw_responses", {})
+
             progress_bar.progress(100, text="✅ All agents complete!")
             live.update(label="✅ Validation pipeline complete!", state="complete")
 
@@ -687,7 +573,6 @@ if st.session_state.validation_result is not None:
     )
     col1, col2, col3 = st.columns(3, gap="medium")
 
-    # — Tenant —
     with col1:
         det     = result.get("details", {}).get("tenant", {})
         missing = det.get("missing", [])
@@ -716,7 +601,6 @@ if st.session_state.validation_result is not None:
             if not found and not missing:
                 st.caption("No detail data returned.")
 
-    # — Landlord —
     with col2:
         l_issues = result.get("details", {}).get("landlord", {}).get("issues", [])
         st.markdown(f"""
@@ -738,7 +622,6 @@ if st.session_state.validation_result is not None:
             else:
                 st.success("No issues found.")
 
-    # — Insurer —
     with col3:
         i_issues = result.get("details", {}).get("insurer", {}).get("issues", [])
         st.markdown(f"""
@@ -784,8 +667,7 @@ if st.session_state.validation_result is not None:
         unsafe_allow_html=True,
     )
     ts_html = (
-        f"<div class='decision-ts'>Processed: {proc_at}</div>"
-        if proc_at else ""
+        f"<div class='decision-ts'>Processed: {proc_at}</div>" if proc_at else ""
     )
     if decision == "APPROVED":
         st.markdown(f"""
@@ -801,6 +683,191 @@ if st.session_state.validation_result is not None:
             <div class="decision-reason">{reason}</div>
             {ts_html}
         </div>""", unsafe_allow_html=True)
+
+    # ════════════════════════════════════════════════════════════════════
+    # DEBUG PANEL
+    # ════════════════════════════════════════════════════════════════════
+    if st.session_state.debug_enabled:
+        st.markdown(
+            "<div class='sec-title'>🛠️ Debug Panel</div>",
+            unsafe_allow_html=True,
+        )
+
+        raw = st.session_state.get("raw_llm_responses", {})
+        det = result.get("details", {})
+
+        # ── helper to render a clause/issue list ─────────────────────────
+        def _list_html(items: list, bullet_class: str) -> str:
+            if not items:
+                return (
+                    "<div style='font-size:0.75rem;color:#334155;"
+                    "font-style:italic;padding:0.3rem 0'>— none —</div>"
+                )
+            rows = ""
+            for item in items:
+                rows += (
+                    f"<div class='debug-list-item'>"
+                    f"<span class='{bullet_class}'>▸</span>"
+                    f"<span>{item}</span></div>"
+                )
+            return rows
+
+        # ── helper to render a key-value row ─────────────────────────────
+        def _kv(key: str, val: str, val_class: str = "debug-val") -> str:
+            return (
+                f"<div class='debug-kv'>"
+                f"<span class='debug-key'>{key}</span>"
+                f"<span class='{val_class}'>{val}</span>"
+                f"</div>"
+            )
+
+        # ── Tenant block ─────────────────────────────────────────────────
+        t_det    = det.get("tenant", {})
+        t_found  = t_det.get("found",   [])
+        t_miss   = t_det.get("missing", [])
+        t_raw    = raw.get("tenant", "— not captured —")
+
+        # ── Landlord block ───────────────────────────────────────────────
+        l_det    = det.get("landlord", {})
+        l_issues = l_det.get("issues", [])
+        l_raw    = raw.get("landlord", "— not captured —")
+
+        # ── Insurer block ────────────────────────────────────────────────
+        i_det    = det.get("insurer", {})
+        i_issues = i_det.get("issues", [])
+        i_raw    = raw.get("insurer", "— not captured —")
+
+        # ── Override log ─────────────────────────────────────────────────
+        ov_log   = result.get("override_log", [])
+
+        # ── Render the panel ─────────────────────────────────────────────
+        st.markdown(f"""
+        <div class="debug-panel">
+
+            <div class="debug-header">
+                <span style="font-size:0.9rem">🛠️</span>
+                <span class="debug-header-title">Agent Debug Inspector</span>
+                <span style="margin-left:auto;font-size:0.7rem;color:#334155">
+                    Read-only · does not affect pipeline
+                </span>
+            </div>
+
+            <div class="debug-body">
+
+                <!-- ══ TENANT ══ -->
+                <div class="debug-section">
+                    <div class="debug-agent-title debug-tenant">👤 Tenant Agent</div>
+
+                    {_kv("Status",
+                         t_status,
+                         _status_val_class(t_status))}
+                    {_kv("Clauses found",   str(len(t_found)))}
+                    {_kv("Clauses missing", str(len(t_miss)))}
+
+                    <div style="margin-top:0.7rem">
+                        <div class="debug-label">✅ Found Clauses</div>
+                        {_list_html(t_found, "debug-bullet-found")}
+                    </div>
+
+                    <div style="margin-top:0.7rem">
+                        <div class="debug-label">❌ Missing Clauses</div>
+                        {_list_html(t_miss, "debug-bullet-missing")}
+                    </div>
+                </div>
+
+                <hr class="debug-divider">
+
+                <!-- ══ LANDLORD ══ -->
+                <div class="debug-section">
+                    <div class="debug-agent-title debug-landlord">🏠 Landlord Agent</div>
+
+                    {_kv("Status",
+                         l_status,
+                         _status_val_class(l_status))}
+                    {_kv("Issues found", str(len(l_issues)))}
+
+                    <div style="margin-top:0.7rem">
+                        <div class="debug-label">⚠️ Issues</div>
+                        {_list_html(l_issues, "debug-bullet-issue")}
+                    </div>
+                </div>
+
+                <hr class="debug-divider">
+
+                <!-- ══ INSURER ══ -->
+                <div class="debug-section">
+                    <div class="debug-agent-title debug-insurer">🛡️ Insurer Agent</div>
+
+                    {_kv("Status",
+                         i_status,
+                         _status_val_class(i_status))}
+                    {_kv("Issues found", str(len(i_issues)))}
+
+                    <div style="margin-top:0.7rem">
+                        <div class="debug-label">⚠️ Issues</div>
+                        {_list_html(i_issues, "debug-bullet-issue")}
+                    </div>
+                </div>
+
+                <hr class="debug-divider">
+
+                <!-- ══ DECISION ══ -->
+                <div class="debug-section">
+                    <div class="debug-agent-title"
+                         style="background:#1E293B;color:#F1F5F9 !important">
+                         ⚖️ Decision Agent
+                    </div>
+                    {_kv("Final Decision",
+                         decision,
+                         "debug-val-ok" if decision == "APPROVED" else "debug-val-failed")}
+                    {_kv("Processed At", proc_at)}
+                    {_kv("Override Count", str(len(ov_log)))}
+                </div>
+
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── Raw LLM Response expanders (native Streamlit for code blocks) ─
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        with st.expander("📨 Raw LLM Response — Tenant Agent"):
+            if t_raw and t_raw != "— not captured —":
+                st.code(t_raw, language="json")
+            else:
+                st.markdown(
+                    "<span style='color:#475569;font-size:0.82rem'>"
+                    "No raw response captured. Ensure "
+                    "<code>raw_responses</code> is populated in "
+                    "<code>main.py</code>.</span>",
+                    unsafe_allow_html=True,
+                )
+
+        with st.expander("📨 Raw LLM Response — Landlord Agent"):
+            if l_raw and l_raw != "— not captured —":
+                st.code(l_raw, language="json")
+            else:
+                st.markdown(
+                    "<span style='color:#475569;font-size:0.82rem'>"
+                    "No raw response captured or agent was skipped.</span>",
+                    unsafe_allow_html=True,
+                )
+
+        with st.expander("📨 Raw LLM Response — Insurer Agent"):
+            if i_raw and i_raw != "— not captured —":
+                st.code(i_raw, language="json")
+            else:
+                st.markdown(
+                    "<span style='color:#475569;font-size:0.82rem'>"
+                    "No raw response captured or agent was skipped.</span>",
+                    unsafe_allow_html=True,
+                )
+
+        with st.expander("📋 Full Pipeline State (JSON)"):
+            st.json(st.session_state.pipeline_state or {})
+
+        with st.expander("📋 Full Result Payload (JSON)"):
+            st.json(result)
 
     # ── Override Log ─────────────────────────────────────────────────────
     override_log = result.get("override_log", [])
@@ -834,7 +901,7 @@ if st.session_state.validation_result is not None:
     st.markdown("""
     <div class="gate-wrap">
         <div class="gate-intro">
-            Review each agent's outcome below. You may
+            Review each agent's outcome. You may
             <strong style="color:#6EE7B7">APPROVE</strong> or
             <strong style="color:#FCA5A5">REJECT</strong> the document,
             <strong style="color:#93C5FD">OVERRIDE</strong> a failed stage
@@ -846,7 +913,6 @@ if st.session_state.validation_result is not None:
     </div>
     """, unsafe_allow_html=True)
 
-    # Build available actions
     landlord_done = l_status not in ("UNKNOWN", "SKIPPED", None)
     insurer_done  = i_status not in ("UNKNOWN", "SKIPPED", None)
 
@@ -862,33 +928,26 @@ if st.session_state.validation_result is not None:
     if insurer_done:
         available_actions.append("REVERT → Re-run Landlord Agent")
 
+    action_labels = {
+        "APPROVE":                               "✅  APPROVE — Accept the document",
+        "REJECT":                                "❌  REJECT — Decline the document",
+        "OVERRIDE Tenant → Proceed to Landlord": "⚡  OVERRIDE Tenant → Proceed to Landlord",
+        "OVERRIDE Landlord → Proceed to Insurer":"⚡  OVERRIDE Landlord → Proceed to Insurer",
+        "OVERRIDE Insurer → Final Approve":      "⚡  OVERRIDE Insurer → Final Approve",
+        "REVERT → Re-run Tenant Agent":          "↩️  REVERT → Re-run Tenant Agent",
+        "REVERT → Re-run Landlord Agent":        "↩️  REVERT → Re-run Landlord Agent",
+    }
+    display_options = [action_labels.get(a, a) for a in available_actions]
+
     with st.form("approval_gate_form"):
-
-        # Action labels with colour hints
-        action_labels = {
-            "APPROVE":                              "✅  APPROVE — Accept the document",
-            "REJECT":                               "❌  REJECT — Decline the document",
-            "OVERRIDE Tenant → Proceed to Landlord":"⚡  OVERRIDE Tenant → Proceed to Landlord",
-            "OVERRIDE Landlord → Proceed to Insurer":"⚡  OVERRIDE Landlord → Proceed to Insurer",
-            "OVERRIDE Insurer → Final Approve":     "⚡  OVERRIDE Insurer → Final Approve",
-            "REVERT → Re-run Tenant Agent":         "↩️  REVERT → Re-run Tenant Agent",
-            "REVERT → Re-run Landlord Agent":       "↩️  REVERT → Re-run Landlord Agent",
-        }
-        display_options = [action_labels.get(a, a) for a in available_actions]
-
         st.markdown(
             "<p style='font-size:0.82rem;font-weight:700;color:#94A3B8;"
             "text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem'>"
-            "Select Action</p>",
-            unsafe_allow_html=True,
+            "Select Action</p>", unsafe_allow_html=True,
         )
         selected_display = st.radio(
-            "Action",
-            options=display_options,
-            index=0,
-            label_visibility="collapsed",
+            "Action", options=display_options, index=0, label_visibility="collapsed",
         )
-        # Map display label back to action key
         selected_action = available_actions[display_options.index(selected_display)]
 
         st.markdown(
@@ -900,10 +959,7 @@ if st.session_state.validation_result is not None:
         )
         comments = st.text_area(
             "Comments",
-            placeholder=(
-                "Provide justification for your decision, override reasoning, "
-                "or notes for the audit record…"
-            ),
+            placeholder="Provide justification for your decision…",
             height=120,
             label_visibility="collapsed",
         )
@@ -911,9 +967,7 @@ if st.session_state.validation_result is not None:
         col_btn, _ = st.columns([1, 3])
         with col_btn:
             submitted = st.form_submit_button(
-                "✅  Confirm Action",
-                type="primary",
-                use_container_width=True,
+                "✅  Confirm Action", type="primary", use_container_width=True,
             )
 
     if submitted:
@@ -923,24 +977,17 @@ if st.session_state.validation_result is not None:
 
         ts = datetime.utcnow().isoformat() + "Z"
 
-        # ── APPROVE / REJECT ─────────────────────────────────────────────
         if selected_action in ("APPROVE", "REJECT"):
             payload = save_approval_gate(
-                st.session_state.validation_result,
-                selected_action,
-                comments,
+                st.session_state.validation_result, selected_action, comments,
             )
             st.session_state.approval_payload = payload
             st.rerun()
 
-        # ── OVERRIDE ─────────────────────────────────────────────────────
         elif "OVERRIDE" in selected_action:
             ps        = dict(st.session_state.pipeline_state or {})
-            log_entry = {
-                "action":    selected_action,
-                "comment":   comments,
-                "timestamp": ts,
-            }
+            log_entry = {"action": selected_action, "comment": comments, "timestamp": ts}
+
             if "Tenant" in selected_action:
                 log_entry["stage"] = "Tenant"
                 ps["tenant_status"]          = "OK_OVERRIDDEN"
@@ -949,17 +996,14 @@ if st.session_state.validation_result is not None:
                     ps.get("tenant_found_clauses", [])
                     + ps.get("tenant_missing_clauses", [])
                 )
-                for k in ("landlord_status","landlord_issues",
-                          "insurer_status","insurer_issues"):
+                for k in ("landlord_status","landlord_issues","insurer_status","insurer_issues"):
                     ps.pop(k, None)
-
             elif "Landlord" in selected_action:
                 log_entry["stage"] = "Landlord"
                 ps["landlord_status"] = "OK_OVERRIDDEN"
                 ps["landlord_issues"] = []
                 for k in ("insurer_status","insurer_issues"):
                     ps.pop(k, None)
-
             elif "Insurer" in selected_action:
                 log_entry["stage"] = "Insurer"
                 ps["insurer_status"] = "OK_OVERRIDDEN"
@@ -971,24 +1015,18 @@ if st.session_state.validation_result is not None:
             st.session_state.validation_result  = None
             st.rerun()
 
-        # ── REVERT ───────────────────────────────────────────────────────
         elif "REVERT" in selected_action:
             ps        = dict(st.session_state.pipeline_state or {})
-            log_entry = {
-                "action":    selected_action,
-                "comment":   comments,
-                "timestamp": ts,
-            }
+            log_entry = {"action": selected_action, "comment": comments, "timestamp": ts}
+
             if "Tenant" in selected_action:
                 log_entry["stage"] = "Tenant (revert)"
-                for k in ("tenant_status","tenant_missing_clauses",
-                          "tenant_found_clauses","landlord_status",
-                          "landlord_issues","insurer_status","insurer_issues"):
+                for k in ("tenant_status","tenant_missing_clauses","tenant_found_clauses",
+                          "landlord_status","landlord_issues","insurer_status","insurer_issues"):
                     ps.pop(k, None)
             elif "Landlord" in selected_action:
                 log_entry["stage"] = "Landlord (revert)"
-                for k in ("landlord_status","landlord_issues",
-                          "insurer_status","insurer_issues"):
+                for k in ("landlord_status","landlord_issues","insurer_status","insurer_issues"):
                     ps.pop(k, None)
 
             ps.setdefault("override_log", []).append(log_entry)
@@ -1010,7 +1048,6 @@ if st.session_state.approval_payload is not None:
         "<div class='sec-title'>✅ Final Decision Recorded</div>",
         unsafe_allow_html=True,
     )
-
     if final_dec == "APPROVE":
         st.markdown(f"""
         <div class="confirm-approved">
@@ -1047,7 +1084,7 @@ if (
         <div class="empty-state-icon">📂</div>
         <div class="empty-state-title">No document loaded yet</div>
         <div class="empty-state-sub">
-            Upload a rental agreement PDF using the sidebar file uploader,<br>
+            Upload a rental agreement PDF using the sidebar,<br>
             select your Ollama model, then click
             <strong>Run Validation Workflow</strong> to begin.
         </div>
